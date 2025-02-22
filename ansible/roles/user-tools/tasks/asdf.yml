@@ -113,7 +113,7 @@
   lineinfile:
     path: "/home/{{ item.username }}/.zshrc"
     regexp: '^source \${ASDF_DATA_DIR:-\$HOME/.asdf}/asdf'
-    line: "source ${ASDF_DATA_DIR:-$HOME/bin/asdf}/asdf.sh"
+    line: "source ${ASDF_DATA_DIR:-$HOME/bin/asdf}/asdf"
     insertafter: '^export PATH="\${ASDF_DATA_DIR:-\$HOME/.asdf}/shims:\$PATH"'
     create: yes
   loop: "{{ server_users }}"
