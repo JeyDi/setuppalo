@@ -1,0 +1,8 @@
+---
+- hosts: all
+
+  become: true
+
+  tasks:
+    - name: "send echo"
+      raw: "echo 'this is a test'"

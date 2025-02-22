@@ -1,0 +1,10 @@
+dev:
+  hosts:
+    dev1:
+      ansible_connection: ssh
+      ansible_host: "{{ ansible_server_host }}"
+      ansible_port: "{{ ansible_server_port }}"
+      ansible_user: "{{ ansible_user }}"
+      ansible_ssh_private_key_file: "{{ ansible_private_key }}"
+      ansible_password: "{{ ansible_user_password }}"
+      ansible_ssh_common_args: "-o IdentitiesOnly=yes"

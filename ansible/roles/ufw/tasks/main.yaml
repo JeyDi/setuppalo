@@ -1,0 +1,71 @@
+- name: Deny all incoming traffic with ufw firewall
+  ansible.builtin.ufw:
+    direction: incoming
+    policy: deny
+
+- name: Setup UFW firewall with openssh only
+  ansible.builtin.ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: Add port 9922 to UFW firewall
+  ansible.builtin.ufw:
+    rule: allow
+    port: "9922"
+    proto: tcp
+
+- name: Add port 443 to UFW firewall
+  ansible.builtin.ufw:
+    rule: allow
+    port: "443"
+    proto: "any"
+
+- name: Add port 80 to UFW firewall
+  ansible.builtin.ufw:
+    rule: allow
+    port: "80"
+    proto: "any"
+
+- name: Enable UFW firewall
+  ansible.builtin.ufw:
+    state: enabled
+# Ufw official role: https://docs.ansible.com/ansible/latest/collections/community/general/ufw_module.html
+
+# - name: Allow everything and enable UFW
+#   community.general.ufw:
+#     state: enabled
+#     policy: allow
+#
+# - name: Set logging
+#   community.general.ufw:
+#     logging: "on"
+#
+# # Sometimes it is desirable to let the sender know when traffic is
+# # being denied, rather than simply ignoring it. In these cases, use
+# # reject instead of deny. In addition, log rejected connections:
+# - community.general.ufw:
+#     rule: reject
+#     port: auth
+#     log: yes
+#
+# # ufw supports connection rate limiting, which is useful for protecting
+# # against brute-force login attacks. ufw will deny connections if an IP
+# # address has attempted to initiate 6 or more connections in the last
+# # 30 seconds. See  http://www.debian-administration.org/articles/187
+# # for details. Typical usage is:
+# - community.general.ufw:
+#     rule: limit
+#     port: ssh
+#     proto: tcp
+#
+# # Allow OpenSSH. (Note that as ufw manages its own state, simply removing
+# # a rule=allow task can leave those ports exposed. Either use delete=yes
+# # or a separate state=reset task)
+# - community.general.ufw:
+#     rule: allow
+#     name: OpenSSH
+# # Install Nami Git management tool
+# # https://github.com/alajmo/mani
+# # - name: install Mani git management tool
+# #   ansible.builtin.command: curl -sfL https://raw.githubusercontent.com/alajmo/mani/main/install.sh | sh
+# #   become: True

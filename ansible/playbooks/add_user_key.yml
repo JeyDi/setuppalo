@@ -1,0 +1,20 @@
+# Create a new sudo admin
+---
+- hosts: base
+  vars_prompt:
+    - name: "username"
+      prompt: "Enter username of the user that you want to update"
+      private: False
+      confirm: False
+  vars:
+    roles_dir: "../roles/users/files/"
+  tasks:
+    - name: Deploy SSH Key
+      authorized_key: 
+        user: "{{username}}"
+        key: "{{ lookup('file', roles_dir + username + '.pub') }}"
+        state: present
+      become: True
+# If you want to use a different folder than the role users
+# key="{{ lookup('file', './keys/authorized/' + credential_file )}}"
+# state=present

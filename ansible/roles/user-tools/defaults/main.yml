@@ -1,0 +1,4 @@
+asdf_version: v0.16.3
+chezmoi_version: 2.59.1
+chezmoi_download_url: "https://github.com/twpayne/chezmoi/releases/download/v{{ chezmoi_version }}/chezmoi_{{ chezmoi_version }}_linux_amd64.deb"
+chezmoi_bin_dir: "/home/{{ item.username }}/bin"

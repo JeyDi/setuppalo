@@ -1,0 +1,7 @@
+do_token = ""
+admin_username = ""
+root_password = ""
+project_name = "Personal"
+project_description = "Personal project"
+project_purpose = "Web Application"
+project_environment = "Development"

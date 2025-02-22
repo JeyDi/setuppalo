@@ -1,0 +1,48 @@
+---
+# vars file for fail2ban
+
+fail2ban_packages:
+  - fail2ban
+
+fail2ban_service: fail2ban
+
+fail2ban_configuration: []
+#  - option: loglevel
+#    value: "INFO"
+#    section: Definition
+
+fail2ban_jail_configuration: []
+#  - option: ignoreself
+#    value: "true"
+#    section: DEFAULT
+
+fail2ban_base_configuration:
+  - option: loglevel
+    value: INFO
+    section: Definition
+  - option: logtarget
+    value: /var/log/fail2ban.log
+    section: Definition
+
+fail2ban_base_jail_configuration:
+  - option: ignoreself
+    value: "true"
+    section: DEFAULT
+  - option: ignoreip
+    value: "127.0.0.1/8 ::1"
+    section: DEFAULT
+  - option: bantime
+    value: 3600
+    section: DEFAULT
+  - option: findtime
+    value: 600
+    section: DEFAULT
+  - option: maxretry
+    value: 20
+    section: DEFAULT
+  - option: destemail
+    value: me@mail.com
+    section: DEFAULT
+  - option: sender
+    value: root@localhost
+    section: DEFAULT

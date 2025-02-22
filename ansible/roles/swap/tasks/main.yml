@@ -1,0 +1,49 @@
+---
+- name: Ensure the parent directory of the swap file exists
+  file:
+    path: "{{ swap_file_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Check if swap file already exists
+  stat:
+    path: "{{ swap_file_path }}"
+  register: swapfile_stat
+
+- name: Create swap file
+  command: fallocate -l {{ swap_file_size }}G {{ swap_file_path }}
+  args:
+    creates: "{{ swap_file_path }}"
+  when: not swapfile_stat.stat.exists
+
+- name: Set permissions on the swap file
+  file:
+    path: "{{ swap_file_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: not swapfile_stat.stat.exists
+
+- name: Check if swap is already enabled
+  command: swapon --show=NAME --noheadings
+  register: swapon_check
+  changed_when: false
+
+- name: Set up swap area
+  command: mkswap {{ swap_file_path }}
+  when: swap_file_path is defined and "{{ swap_file_path }}" not in swapon_check.stdout_lines
+
+- name: Enable swap file
+  command: swapon {{ swap_file_path }}
+  when: swap_file_path is defined and "{{ swap_file_path }}" not in swapon_check.stdout_lines
+
+- name: Add swap file to fstab
+  mount:
+    name: "{{ swap_file_path }}"
+    src: "{{ swap_file_path }}"
+    fstype: swap
+    opts: sw
+    state: present
+  when: swap_file_path is defined

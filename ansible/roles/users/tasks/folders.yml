@@ -1,0 +1,7 @@
+- name: Create /data directory
+  file:
+    path: /data
+    state: directory
+    mode: "2770"
+    group: dev
+  become: true

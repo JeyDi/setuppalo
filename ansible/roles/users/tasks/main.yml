@@ -1,0 +1,10 @@
+---
+#################
+#users creation
+################
+- name: group creation
+  include_tasks: groups.yml
+- name: users creation
+  include_tasks: users.yml
+- name: folder creation
+  include_tasks: folders.yml

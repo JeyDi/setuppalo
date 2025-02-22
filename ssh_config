@@ -1,0 +1,6 @@
+Host testone
+    Hostname testone
+    User jeydi
+    Port 22
+    IdentityFile ~/.ssh/server
+    IdentitiesOnly yes

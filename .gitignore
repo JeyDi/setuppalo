@@ -1,0 +1,10 @@
+# .gitignore
+.env
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+ssh_keys/*
+!ssh_keys/readme.md
+.terraform.lock.hcl
+.vault_pass

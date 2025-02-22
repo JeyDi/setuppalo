@@ -1,0 +1,10 @@
+- name: download bashtop
+  ansible.builtin.git:
+    repo: "https://github.com/aristocratos/bashtop.git"
+    dest: "/home/{{ ansible_user }}/bashtop"
+
+- name: launch installation
+  make:
+    chdir: /home/{{ ansible_user }}/bashtop
+    target: install
+  become: True

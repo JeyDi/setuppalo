@@ -1,0 +1,114 @@
+# - name: Check if oh-my-zsh already exists
+#   loop: "{{ server_users }}"
+#   stat:
+#     path: "/home/{{ item.username }}/.oh-my-zsh"
+#   register: zsh_check
+#   become: true
+
+- name: Check the installation of zsh
+  apt:
+    name: zsh
+    state: present
+  become: True
+
+- name: Remove oh-my-zsh folder if exists
+  loop: "{{ server_users }}"
+  # when: zsh_check.changed
+  ansible.builtin.file:
+    path: "/home/{{ item.username }}/.oh-my-zsh"
+    state: absent
+  become: true
+
+- name: Clone oh-my-zsh for users
+  loop: "{{ server_users }}"
+  ansible.builtin.command: "git clone -c core.autocrlf=input --depth=1 https://github.com/ohmyzsh/ohmyzsh.git .oh-my-zsh"
+  args:
+    chdir: "/home/{{ item.username }}"
+    creates: "/home/{{ item.username }}/.oh-my-zsh"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Set permissions of oh-my-zsh for users
+  become: true
+  loop: "{{ server_users }}"
+  ansible.builtin.file:
+    path: "/home/{{ item.username }}/.oh-my-zsh"
+    # Prevent the cloned repository from having insecure permissions. Failing to do
+    # so causes compinit() calls to fail with "command not found: compdef" errors
+    # for users with insecure umasks (e.g., "002", allowing group writability).
+    mode: "go-w"
+    recurse: true
+
+- name: Set zsh as default shell for user
+  loop: "{{ server_users }}"
+  user:
+    name: "{{ item.username }}"
+    shell: /bin/zsh
+  become: True
+
+# - name: Set default shell for users
+#   become: true
+#   ansible.builtin.user:
+#     name: "{{ user.username }}"
+#     shell: "{{ oh_my_zsh_zsh_path }}"
+#   with_items: "{{ users }}"
+#   when: "((user.oh_my_zsh | default({})).install | default(oh_my_zsh_install)) | bool"
+#   loop_control:
+#     loop_var: user
+#     label: "{{ user.username }}"
+
+- name: Download powerlevel10k
+  git:
+    repo: "https://github.com/romkatv/powerlevel10k.git"
+    dest: "/opt/tools/.oh-my-zsh/custom/themes/powerlevel10k"
+  # args:
+  #   executable: /bin/"{{ item.shell }}"
+  become: true
+
+- name: Create the powerlevel10k directory if not exist
+  loop: "{{ server_users }}"
+  file:
+    path: "/home/{{ item.username }}/.oh-my-zsh/custom/themes/powerlevel10k"
+    state: directory
+    recurse: yes
+
+- name: Copy powerlevel10k into user directory
+  loop: "{{ server_users }}"
+  copy:
+    src: "/opt/tools/.oh-my-zsh/custom/themes/powerlevel10k"
+    dest: "/home/{{ item.username }}/.oh-my-zsh/custom/themes/"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0755"
+    remote_src: true
+  ignore_errors: True #not everyone has zsh
+  become: true
+
+  # become_user: "{{ item.username }}"
+
+- name: Ensure correct permissions on oh-my-zsh directory
+  loop: "{{ server_users }}"
+  file:
+    path: "/home/{{ item.username }}/.oh-my-zsh"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0755"
+    recurse: yes
+  ignore_errors: True #not everyone has zsh
+  become: true
+# - name: Populate default bashrc
+#   loop: "{{ server_users }}"
+#   template:
+#     src: bashrc.j2
+#     dest: "/home/{{ item.username }}/.bashrc"
+#   become: true
+#   become_user: "{{ item.username }}"
+# become_user: "{{ item.username }}"
+# - name: Populate default zshrc
+#   loop: "{{ server_users }}"
+#   template:
+#     src: zshrc.j2
+#     dest: "/home/{{ item.username }}/.zshrc"
+#   become: true
+#   become_user: "{{ item.username }}"

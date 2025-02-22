@@ -1,0 +1,26 @@
+---
+- hosts: [dev]
+
+  roles:
+    # Install the basic tools and add the users
+    - {
+        role: roles/base-tools,
+        tags: ["base", "tools", "base-tools"],
+        become: True,
+      }
+    - { role: roles/users, tags: ["users"], become: True }
+    # Install the required tools
+    - { role: roles/bashtop, tags: ["base", "tools", "bashtop"], become: True }
+    - { role: roles/journal_dir, tags: ["journal_dir"], become: True }
+    - { role: roles/docker, tags: ["docker"], become: True }
+    - { role: roles/swap, tags: ["swap", "ram", "swapfile"], become: True }
+    # Configure the system
+    - { role: roles/sshd, tags: ["base", "tools", "sshd"], become: True }
+    - { role: roles/ufw, tags: ["ufw", "firewall"], become: True }
+    - { role: roles/motd, tags: ["motd"], become: True }
+    #- { role: roles/fail2ban, tags: ["base", "tools", "fail2ban"], become: True }
+    - {
+        role: roles/user-tools,
+        tags: ["users", "tools", "custom", "user-tools"],
+        become: True,
+      }

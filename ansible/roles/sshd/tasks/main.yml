@@ -1,0 +1,31 @@
+---
+- name: Configure sshd
+  lineinfile:
+    path: "/etc/ssh/sshd_config"
+    regex: "^(#)?{{item.key}}"
+    line: "{{item.key}} {{item.value}}"
+    state: present
+  loop:
+    - { key: "PermitRootLogin", value: "no" }
+    - { key: "PasswordAuthentication", value: "yes" }
+    - { key: "Port", value: "9922" }
+    - { key: "Protocol", value: "2" }
+    - { key: "LoginGraceTime", value: "30" }
+    - { key: "MaxSessions", value: "50" }
+    - { key: "X11Forwarding", value: "no" }
+    - { key: "X11DisplayOffset", value: "10" }
+    - { key: "SyslogFacility", value: "AUTH" }
+    - { key: "LogLevel", value: "VERBOSE" }
+    - { key: "MaxAuthTries", value: "2" }
+
+- name: Stop and Start ssh
+  service:
+    name: ssh
+    state: restarted
+
+- name: ensure PermitRootLogin is not activated
+  lineinfile:
+    path: "/etc/ssh/sshd_config"
+    line: "PermitRootLogin yes"
+    state: absent
+

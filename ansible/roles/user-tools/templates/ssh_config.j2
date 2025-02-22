@@ -1,0 +1,12 @@
+Host github.com
+	HostName github.com
+	User {{ item.username}}
+	IdentityFile ~/.ssh/{{ item.username}}
+
+Host dev1
+	HostName dev1
+	Port 9922
+	User {{ item.username }}
+	IdentityFile  ~/.ssh/{{ item.username}}
+	RequestTTY yes
+	ServerAliveInterval 60

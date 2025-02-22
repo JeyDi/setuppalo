@@ -1,0 +1,25 @@
+- name: Download chezmoi deb package
+  get_url:
+    url: "{{ chezmoi_download_url }}"
+    dest: "/tmp/chezmoi.deb"
+    mode: "0644"
+  become: True
+
+- name: Install chezmoi deb package
+  apt:
+    deb: "/tmp/chezmoi.deb"
+  become: True
+
+- name: Verify chezmoi installation
+  stat:
+    path: "/usr/local/bin/chezmoi"
+  register: chezmoi_stat
+  become: True
+
+- name: Ensure chezmoi binary is executable
+  file:
+    path: "/usr/local/bin/chezmoi"
+    mode: "0755"
+    state: file
+  when: chezmoi_stat.stat.exists
+  become: True

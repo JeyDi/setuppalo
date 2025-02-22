@@ -1,0 +1,10 @@
+ansible_server_host: "24.144.78.157"
+ansible_server_port: 22
+ansible_user: "root"
+ansible_private_key: "~/.ssh/server"
+ansible_user_password: "{{ vault_ansible_root_password }}"
+ansible_root_password: "{{ vault_ansible_root_password }}"
+default_user_password: "{{ vault_default_password }}"
+swap_file_path: /swap/swapfile
+swap_file_size: 2 # in GB
+docker_compose_version: "v2.22.0"

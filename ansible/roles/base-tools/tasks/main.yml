@@ -1,0 +1,6 @@
+---
+- name: install basic packages
+  apt:
+    name: "{{ base_pkgs }}"
+    state: present
+    update_cache: yes

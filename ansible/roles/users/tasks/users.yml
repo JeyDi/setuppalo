@@ -1,0 +1,45 @@
+---
+- name: Add new users
+  loop: "{{ server_users }}"
+  user:
+    name: "{{ item.username }}"
+    shell: "/bin/{{ item.shell }}"
+    password: "{{ default_user_password }}"
+    createhome: yes
+    groups: [users, docker, dev, sudo]
+
+- name: Add new users to sudoers and remove pw auth
+  loop: "{{ server_users }}"
+  copy:
+    dest: '/etc/sudoers.d/"{{ item.username }}"'
+    content: '"{{ item.username }}" ALL=(ALL) NOPASSWD: ALL'
+    # content: |
+    #   {% if item.username == 'ubuntu' %}
+    #   {{ item.username }} ALL=(ALL) ALL
+    #   {% else %}
+    #   {{ item.username }} ALL=(ALL) NOPASSWD: ALL
+    #   {% endif %}
+
+- name: Deploy SSH Key for users
+  loop: "{{ server_users }}"
+  authorized_key: user="{{ item.username }}"
+    key="{{ lookup('file', './keys/' + item.credential_file )}}"
+    state=present
+
+- name: Force users to change default password if not changed
+  become: true
+  block:
+    - name: Check last password change date
+      shell: "chage -l {{ item.username }} | grep 'Last password change' | awk -F: '{print $2}'"
+      register: password_change_date
+      with_items: "{{ server_users }}"
+      changed_when: false
+
+    - name: Force user to change password if it is still default
+      command: chage -d 0 "{{ item.username }}"
+      when: item.stdout == 'never'
+      with_items: "{{ password_change_date.results }}"
+# - name: Force users to change default password
+#   loop: "{{ server_users }}"
+#   command: chage -d 0 "{{ item.username }}"
+#   become: True

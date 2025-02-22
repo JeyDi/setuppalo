@@ -1,0 +1,44 @@
+- name: add gpg key for docker
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+  become: True
+- name: add docker apt repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+    state: present
+  become: True
+- name: install docker
+  apt:
+    name: docker-ce
+    state: present
+  become: True
+- name: copy /etc/docker/daemon.json
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    mode: 0644
+  become: True
+- name: start service docker on ubuntu
+  systemd:
+    name: docker
+    state: started
+  become: True
+- name: install docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/{{docker_compose_version}}/docker-compose-linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 0777
+    owner: root
+    group: root
+  become: True
+- name: create group user
+  ansible.builtin.group:
+    name: docker
+    state: present
+  become: True
+- name: add user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: [docker]
+    append: True
+  become: True

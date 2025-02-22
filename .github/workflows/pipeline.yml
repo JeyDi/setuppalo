@@ -1,0 +1,76 @@
+name: Docker Build and Push
+
+on:
+  release:
+    types: [published]
+
+env:
+  CUSTOM_IMAGE_NAME: pippo
+  TARGET_ENVIRONMENT: develop
+
+jobs:
+  # docker:
+  #   runs-on: ubuntu-22.04
+  #   if: github.event.release.target_commitish == '${{env.TARGET_ENVIRONMENT}}'
+  check_environment:
+    runs-on: ubuntu-22.04
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - id: check
+        run: |
+          if [[ "${{ github.event.release.target_commitish }}" == "${{env.TARGET_ENVIRONMENT}}" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "✅ Release is targeting ${{env.TARGET_ENVIRONMENT}} branch - proceeding with deployment"
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ Release is not targeting ${{env.TARGET_ENVIRONMENT}} branch - skipping deployment"
+          fi
+
+  docker:
+    needs: check_environment
+    if: needs.check_environment.outputs.should_run == 'true'
+    runs-on: ubuntu-22.04
+
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.release.target_commitish }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Set Custom Image Name
+        id: image_name
+        run: |
+            # Base image name
+            BASE_NAME=ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-${{env.CUSTOM_IMAGE_NAME}}-test
+            # Crea i tag
+            TAGS="$BASE_NAME:${{ github.event.release.tag_name }}"
+            echo "tags=$(echo $TAGS | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+            echo "tags=$(echo $TAGS | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+            echo "Generated tags: $TAGS"
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          # tags: ${{ steps.image_name.outputs.tags }}
+          tags: ${{ steps.image_name.outputs.tags }}
+      
+      - name: Echo latest image and tags
+        run: |
+          echo "Latest image and tags: ${{ steps.image_name.outputs.tags }}"

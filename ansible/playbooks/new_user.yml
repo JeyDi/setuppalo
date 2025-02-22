@@ -1,0 +1,40 @@
+---
+- hosts: [all]
+  become: True
+
+  vars_prompt:
+    - name: "input_username"
+      prompt: "Enter a name for the new user"
+      private: False
+      confirm: False
+      default: "test"
+    - name: "input_shell"
+      prompt: "Enter a shell for the new user"
+      private: False
+      confirm: False
+      default: "zsh"
+    - name: "input_credential_file"
+      prompt: "Enter the credential file name for the user (with the .pub extension)"
+      private: False
+      confirm: False
+      default: "id_rsa.pub"
+    - name: "input_sudo"
+      prompt: "Is the new user a sudo user? (True/False)"
+      private: False
+      confirm: False
+      default: "True"
+  vars:
+    server_users:
+      [
+        {
+          username: "{{input_username}}",
+          password: "{{vault_default_password}}",
+          shell: "{{input_shell}}",
+          credential_file: "{{input_credential_file}}",
+          sudo: "{{ input_sudo | bool }}",
+        },
+      ]
+
+  roles:
+    - { role: roles/users, tags: ["users"] }
+    - { role: roles/user-tools, tags: ["users", "tools", "custom"] }

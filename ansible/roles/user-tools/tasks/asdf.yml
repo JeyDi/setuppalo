@@ -1,0 +1,154 @@
+---
+- name: Remove previous asdf installation (if exists)
+  file:
+    path: "/home/{{ item.username }}/bin/asdf"
+    state: absent
+  loop: "{{ server_users }}"
+  become: true
+
+- name: Ensure the user's asdf directory exists
+  file:
+    path: "/home/{{ item.username }}/bin/asdf"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0755"
+  loop: "{{ server_users }}"
+  become: true
+
+- name: Ensure ownership of the user's asdf directory
+  file:
+    path: "/home/{{ item.username }}/bin/asdf"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+  loop: "{{ server_users }}"
+  become: true
+
+- name: Download asdf binary tarball for the version = {{asdf_version}}
+  get_url:
+    url: "https://github.com/asdf-vm/asdf/releases/download/{{ asdf_version }}/asdf-{{asdf_version}}-linux-amd64.tar.gz"
+    dest: "/home/{{ item.username }}/asdf.tar.gz"
+    mode: "0644"
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Create temporary extraction directory for asdf
+  file:
+    path: "/home/{{ item.username }}/tmp_asdf"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0755"
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Extract asdf binary tarball
+  unarchive:
+    src: "/home/{{ item.username }}/asdf.tar.gz"
+    dest: "/home/{{ item.username }}/tmp_asdf"
+    remote_src: yes
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Move asdf binary to right directory
+  copy:
+    src: "/home/{{ item.username }}/tmp_asdf/"
+    dest: "/home/{{ item.username }}/bin/asdf/"
+    remote_src: yes
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Ensure asdf binary is executable
+  file:
+    path: "/home/{{ item.username }}/bin/asdf/asdf"
+    mode: "0755"
+    state: file
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Remove temporary extraction directory
+  file:
+    path: "/home/{{ item.username }}/tmp_asdf"
+    state: absent
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Remove downloaded asdf tarball
+  file:
+    path: "/home/{{ item.username }}/asdf.tar.gz"
+    state: absent
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Update .zshrc to export ASDF_DATA_DIR for asdf
+  lineinfile:
+    path: "/home/{{ item.username }}/.zshrc"
+    regexp: "^export ASDF_DATA_DIR="
+    line: 'export ASDF_DATA_DIR="$HOME/bin/asdf"'
+    insertbefore: '^export PATH="\${ASDF_DATA_DIR:-\$HOME/.asdf}/shims:\$PATH"'
+    create: yes
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Update .zshrc to add asdf shims directory to PATH
+  lineinfile:
+    path: "/home/{{ item.username }}/.zshrc"
+    regexp: '^export PATH="\${ASDF_DATA_DIR:-\$HOME/.asdf}/shims:\$PATH"'
+    line: 'export PATH="${ASDF_DATA_DIR:-$HOME/bin/asdf}/shims:$PATH"'
+    insertafter: EOF
+    create: yes
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Ensure asdf completions are sourced in .zshrc
+  lineinfile:
+    path: "/home/{{ item.username }}/.zshrc"
+    regexp: '^source \${ASDF_DATA_DIR:-\$HOME/.asdf}/asdf'
+    line: "source ${ASDF_DATA_DIR:-$HOME/bin/asdf}/asdf.sh"
+    insertafter: '^export PATH="\${ASDF_DATA_DIR:-\$HOME/.asdf}/shims:\$PATH"'
+    create: yes
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Add asdf completions to fpath in .zshrc
+  lineinfile:
+    path: "/home/{{ item.username }}/.zshrc"
+    regexp: '^fpath=\(\${ASDF_DATA_DIR:-\$HOME/.asdf}/completions'
+    line: "fpath=(${ASDF_DATA_DIR:-$HOME/bin/asdf}/completions $fpath)"
+    insertafter: '^source \${ASDF_DATA_DIR:-\$HOME/.asdf}/asdf'
+    create: yes
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Initialize zsh completions in .zshrc
+  lineinfile:
+    path: "/home/{{ item.username }}/.zshrc"
+    regexp: "^autoload -Uz compinit"
+    line: "autoload -Uz compinit && compinit"
+    insertafter: '^fpath=\(\${ASDF_DATA_DIR:-\$HOME/.asdf}/completions'
+    create: yes
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Ensure asdf directory is in PATH
+  lineinfile:
+    path: "/home/{{ item.username }}/.zshrc"
+    regexp: '^export PATH="\$HOME/bin/asdf:\$PATH"'
+    line: 'export PATH="$HOME/bin/asdf:$PATH"'
+    insertafter: EOF
+    create: yes
+  loop: "{{ server_users }}"
+  become: true
+  become_user: "{{ item.username }}"

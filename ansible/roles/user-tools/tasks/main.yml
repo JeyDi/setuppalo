@@ -1,0 +1,67 @@
+# Custom user config
+---
+# Populate the default zshrc and bashrc
+- name: Populate default zshrc
+  loop: "{{ server_users }}"
+  template:
+    src: zshrc.j2
+    dest: "/home/{{ item.username }}/.zshrc"
+  become: true
+  become_user: "{{ item.username }}"
+
+- name: Populate default bashrc
+  loop: "{{ server_users }}"
+  template:
+    src: bashrc.j2
+    dest: "/home/{{ item.username }}/.bashrc"
+  become: true
+  become_user: "{{ item.username }}"
+
+# Install asdf
+- include_tasks: "asdf.yml"
+
+# Install chezmoi
+- include_tasks: chezmoi.yml
+
+# Launch oh-my-zsh installation
+- include_tasks: "ohmyzsh.yml"
+
+# Add the standard ssh config
+- name: Add standard SSH config
+  loop: "{{ server_users }}"
+  template:
+    src: ssh_config.j2
+    dest: "/home/{{ item.username }}/.ssh/config"
+  become: true
+  become_user: "{{ item.username }}"
+# Install pyenv for every user
+# - include_tasks: "{{ role_path }}/tasks/pyenv.yml"
+# - name: Copy powerlevel10k styling into user directory
+#   loop: "{{ server_users }}"
+#   copy:
+#     src: "roles/user-tools/templates/p10k.zsh.j2"
+#     dest: "/home/{{ item.username }}/.p10k.zsh"
+#     owner: "{{ item.username }}"
+#     group: "{{ item.username }}"
+#     mode: "0755"
+#     remote_src: false
+#   become: true
+# - name: Copy also the powerlevel10k styling
+#   loop: "{{ server_users }}"
+#   template:
+#     src: p10k.zsh.j2
+#     dest: "/home/{{ item.username }}/.p10k.zsh"
+#   become: true
+#   become_user: "{{ item.username }}"
+
+# become_user: "{{ item.username }}"
+# shell: echo 'source ~/.oh-my-zsh/oh-my-zsh.sh' >> ~/.zshrc
+# args:
+# executable: /bin/bash
+# - name: Change owner and group of all files in a directory
+#   file:
+#     path: "/path/to/directory"
+#     owner: "some_user"
+#     group: "some_group"
+#     recurse: yes
+#   become: true

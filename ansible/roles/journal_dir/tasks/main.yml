@@ -1,0 +1,8 @@
+# Having a journal directory allows systemd to save its journal between reboots
+- name: create /val/log/journal
+  file:
+    path: /val/log/journal
+    state: directory
+    owner: root
+    group: root
+    mode: '2755'

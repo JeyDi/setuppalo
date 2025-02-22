@@ -1,0 +1,55 @@
+base_pkgs:
+  - apt-transport-https
+  - unattended-upgrades
+  - git
+  - openssh-server
+  - ca-certificates
+  - net-tools
+  - vim
+  - locate
+  - tree
+  - tmux
+  - acl
+  - htop
+  - make
+  - cmake
+  - cmake-curses-gui
+  - build-essential
+  - curl
+  - wget
+  - virtualenv
+  - sshpass
+  - zsh
+  - ufw
+  - htop
+  - tldr
+  - bat
+  - httpie
+  - ncdu
+  - fzf
+  - fd-find
+  - zip
+  - unzip
+  - gcc
+  - gnupg2
+  - s3fs
+  # extra
+  - build-essential
+  - libssl-dev
+  - zlib1g-dev
+  - libncurses5-dev
+  - libncursesw5-dev
+  - libreadline-dev
+  - libsqlite3-dev
+  - libgdbm-dev
+  - libbz2-dev
+  - libexpat1-dev
+  - liblzma-dev
+  - tk-dev
+  - libffi-dev
+  - libnss3-dev
+  # - texlive
+  # - texlive-extra-utils
+  # - texlive-latex-extra
+  # - texlive-lang-italian
+  # - tex4ht

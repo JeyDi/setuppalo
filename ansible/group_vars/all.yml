@@ -1,0 +1,6 @@
+server_users:
+  - username: jeydi
+    password: "{{ vault_default_password }}"
+    shell: zsh
+    credential_file: jeydi.pub
+    sudo: True
